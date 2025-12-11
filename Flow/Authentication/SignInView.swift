@@ -13,13 +13,22 @@ final class SignInEmailViewModel : ObservableObject {
     @Published var email = ""
     @Published var password = ""
     
+    func signIn() async throws {
+        guard !email.isEmpty , !password.isEmpty else {
+            print("No email or password found.")
+            return
+        }
+        
+        try await AuthenticationManager.shared.signInUser(email: email, password: password)
+    }
 }
 
 struct SignInView: View {
     
     @StateObject private var viewModel = SignInEmailViewModel()
-    @State private var isPasswordVisible = false
+    @Binding var showSignInView: Bool
     
+    @State private var isPasswordVisible = false
     @State private var showForgotPasswordView = false
     
     var body: some View {
@@ -87,7 +96,15 @@ struct SignInView: View {
                     .padding(.top, 8)
 
                     Button(action: {
-                        // Sign In
+                        Task {
+                            do {
+                                try await viewModel.signIn()
+                                showSignInView = false
+                                return
+                            } catch {
+                                print(error)
+                            }
+                        }
                     }) {
                         Text("Вход")
                             .frame(alignment: .center)
@@ -137,6 +154,10 @@ struct RoundedCorner: Shape {
     }
 }
 
-#Preview {
-    SignInView()
+struct SignInView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            SignInView(showSignInView: .constant(false))
+        }
+    }
 }

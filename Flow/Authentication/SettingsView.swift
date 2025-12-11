@@ -8,15 +8,15 @@
 import SwiftUI
 
 @MainActor
-final class BudgetPageViewModel: ObservableObject {
+final class SettingsViewModel: ObservableObject {
     func signOut() throws {
         try AuthenticationManager.shared.signOut()
     }
 }
 
-struct BudgetPageView : View {
+struct SettingsView : View {
     
-    @StateObject private var viewModel = BudgetPageViewModel()
+    @StateObject private var viewModel = SettingsViewModel()
     @Binding var showSignInView: Bool
     
     var body : some View {
@@ -25,21 +25,17 @@ struct BudgetPageView : View {
                 Task {
                     do {
                         try viewModel.signOut()
-                        showSignInView = true
                     } catch {
                         print(error)
-                    }
                 }
             }
         }
-        .navigationBarTitle("Budget Page")
     }
 }
 
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
-        NavigationStack {
-            BudgetPageView(showSignInView: .constant(false))
+        SettingsView(showSignInView: .constant(false)) 
         }
     }
 }

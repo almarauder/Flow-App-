@@ -7,19 +7,41 @@
 
 import SwiftUI
 
+@MainActor
+final class SignUpModelView: ObservableObject {
+    
+    @Published var Name = ""
+    @Published var Surname = ""
+    @Published var PhoneNumber = ""
+    @Published var Email = ""
+    @Published var Password = ""
+    @Published var PasswordConfirm = ""
+    
+    func signUp() async throws {
+        guard !Email.isEmpty , !Password.isEmpty else {
+            print("No email or password found.")
+            return
+        }
+        guard Password == PasswordConfirm && !Password.isEmpty else {
+            print("Password does not match")
+            return
+        }
+        
+        try await AuthenticationManager.shared.createUser(email: Email, password: Password)
+    }
+    
+}
+
 struct SignUpView: View {
-    @State private var Name = ""
-    @State private var Surname = ""
-    @State private var PhoneNumber = ""
-    @State private var Email = ""
-    @State private var Password = ""
-    @State private var PasswordConfirm = ""
+    @StateObject private var viewModel = SignUpModelView()
     @State private var isPasswordVisible = false
     @State private var isPasswordConfirmVisible = false
     @State private var agreeToTerms = false
     
     @State private var showSignIn = false
     @State private var showTerms = false
+    
+    @Binding var showSignInView: Bool
     
     var body: some View {
         NavigationStack {
@@ -29,7 +51,7 @@ struct SignUpView: View {
                 
                 VStack(spacing: 0) {
                     Text("Добро Пожаловать!")
-                        .font(.system(size: 40))
+                        .font(.system(size: 32))
                         .bold()
                         .foregroundStyle(.white)
                         .padding(.top, 50)
@@ -38,14 +60,14 @@ struct SignUpView: View {
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(alignment: .leading, spacing: 24) {
                             Group {
-                                fieldView(title: "Имя", text: $Name, placeholder: "Имя")
-                                fieldView(title: "Фамилия", text: $Surname, placeholder: "Фамилия")
-                                fieldView(title: "Номер Телефона", text: $PhoneNumber, placeholder: "+7 (")
-                                fieldView(title: "Почта", text: $Email, placeholder: "Email")
+                                fieldView(title: "Имя", text: $viewModel.Name, placeholder: "Имя")
+                                fieldView(title: "Фамилия", text: $viewModel.Surname, placeholder: "Фамилия")
+                                fieldView(title: "Номер Телефона", text: $viewModel.PhoneNumber, placeholder: "+7 (")
+                                fieldView(title: "Почта", text: $viewModel.Email, placeholder: "Email")
                             }
                             
-                            passwordField(title: "Пароль", text: $Password)
-                            passwordField(title: "Подтверждение Пароль", text: $PasswordConfirm)
+                            passwordField(title: "Пароль", text: $viewModel.Password)
+                            passwordField(title: "Подтверждение Пароль", text: $viewModel.PasswordConfirm)
 
                             HStack(alignment: .top, spacing: 12) {
                                 Button(action: {
@@ -110,7 +132,7 @@ struct SignUpView: View {
                     .ignoresSafeArea(edges: .bottom)
                     
                     .navigationDestination(isPresented: $showSignIn) {
-                        SignInView()
+                        SignInView(showSignInView: $showSignInView)
                     }
                 }
             }
@@ -155,6 +177,10 @@ struct SignUpView: View {
     }
 }
 
-#Preview {
-    SignUpView()
+struct SignUpView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            SignUpView(showSignInView: .constant(false))
+        }
+    }
 }

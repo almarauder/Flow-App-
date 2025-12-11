@@ -20,6 +20,8 @@ struct ContentView: View {
     @State private var showSignIn = false
     @State private var showSignUp = false
     @State private var showForgotPassword = false
+    @Binding var showSignInView: Bool
+    @Binding var showSignUpView: Bool
     
     var body: some View {
         NavigationStack {
@@ -75,10 +77,10 @@ struct ContentView: View {
                     Spacer()
                 }
                 .navigationDestination(isPresented: $showSignIn) {
-                    SignInView()
+                    SignInView(showSignInView: $showSignInView)
                 }
                 .navigationDestination(isPresented: $showSignUp) {
-                    SignUpView()
+                    SignUpView(showSignInView: $showSignUpView)
                 }
                 .navigationDestination(isPresented: $showForgotPassword ) {
                     ForgotPasswordView()
@@ -88,6 +90,10 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    ContentView()
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationStack {
+            ContentView(showSignInView: .constant(false), showSignUpView: .constant(false))
+        }
+    }
 }
