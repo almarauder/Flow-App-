@@ -21,7 +21,6 @@ struct ContentView: View {
     @State private var showSignUp = false
     @State private var showForgotPassword = false
     @Binding var showSignInView: Bool
-    @Binding var showSignUpView: Bool
     
     var body: some View {
         NavigationStack {
@@ -80,7 +79,7 @@ struct ContentView: View {
                     SignInView(showSignInView: $showSignInView)
                 }
                 .navigationDestination(isPresented: $showSignUp) {
-                    SignUpView(showSignInView: $showSignUpView)
+                    SignUpView(showSignInView: $showSignInView)
                 }
                 .navigationDestination(isPresented: $showForgotPassword ) {
                     ForgotPasswordView()
@@ -93,7 +92,7 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
-            ContentView(showSignInView: .constant(false), showSignUpView: .constant(false))
+            ContentView(showSignInView: .constant(false))
         }
     }
 }

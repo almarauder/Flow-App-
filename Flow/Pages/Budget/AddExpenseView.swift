@@ -32,7 +32,7 @@ struct AddExpenseView: View {
             case .food: return "Food"
             case .transport: return "Transport"
             case .rent: return "Rent"
-            case .gifts: return "Gift"
+            case .gifts: return "Gifts"
             }
         }
         

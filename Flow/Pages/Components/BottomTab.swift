@@ -18,7 +18,7 @@ struct BottomTab: View {
             VStack(spacing: 4) {
                 Image(icon)
                     .renderingMode(.template)
-                    .foregroundColor(.black)
+                    .foregroundColor(isSelected ? .white : .black)
                     .font(.system(size: 26))
                 
                 Text(label)

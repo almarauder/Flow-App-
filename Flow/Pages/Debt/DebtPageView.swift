@@ -1,26 +1,31 @@
+//
+//  DebtView.swift
+//  Flow
+//
+//  Created by Darking Almas on 17.12.2025.
+//
+
 import SwiftUI
 
-struct BudgetView: View {
-    @State private var TotalExpense = 188000
-    @State private var FoodExpense = 130000
-    @State private var TransportExpense = 30000
-    @State private var CommunalExpense = 28000
+struct DebtsPageView: View {
+    var totalDebts: Int {
+        debts.reduce(0) { $0 + $1.totalAmount}
+    }
     
-    @State private var TotalIncome = 160000
-    @State private var SalaryIncome = 130000
-    @State private var BusinessIncome = 30000
-    @State private var InvestmentIncome = 28000
+    var totalDebtors: Int {
+        debtors.reduce(0) { $0 + $1.remainingAmount}
+    }
     
-    @State private var TotalAccount = 450000
-    @State private var CashAccount = 200000
-    @State private var BankAccount = 250000
+    @State private var debts: [Debt] = [ Debt(name: "Манси", totalAmount: 100_000, remainingAmount: 100_000, color: .red), Debt(name: "Вася", totalAmount: 30_000, remainingAmount: 30_000, color: .orange)
+    ]
+    
+    @State private var debtors: [Debt] = [ Debt(name: "Сайка" , totalAmount: 50_000 , remainingAmount: 50_000 , color: .red)
+    ]
     
     @State private var selectedTab = 0
     @Binding var selectedBottomTab: String
-    @State private var showAddExpense = false
-    @State private var showAddIncome = false
     
-    @State private var activeSheet: AddSheetType? = nil
+    @State private var activeSheet: DebtSheetType? = nil
     
     var body: some View {
         NavigationStack {
@@ -41,7 +46,7 @@ struct BudgetView: View {
                             Spacer()
                         }
                         
-                        Text("Бюджет")
+                        Text("Долги")
                             .font(.system(size: 34, weight: .bold))
                             .foregroundColor(.white)
                     }
@@ -58,9 +63,9 @@ struct BudgetView: View {
                         ScrollView(.vertical, showsIndicators: false) {
                             VStack(spacing: 0) {
                                 HStack(spacing: 0) {
-                                    TabItem(title: "Расходы", selected: selectedTab == 0) { selectedTab = 0 }
-                                    TabItem(title: "Доходы", selected: selectedTab == 1) { selectedTab = 1 }
-                                    TabItem(title: "Счета", selected: selectedTab == 2) { selectedTab = 2 }
+                                    TabItem(title: "Все", selected: selectedTab == 0) { selectedTab = 0 }
+                                    TabItem(title: "Долги", selected: selectedTab == 1) { selectedTab = 1 }
+                                    TabItem(title: "Должники", selected: selectedTab == 2) { selectedTab = 2 }
                                 }
                                 .padding(8)
                                 .background(Color(red: 0.82, green: 0.93, blue: 0.98))
@@ -71,23 +76,20 @@ struct BudgetView: View {
                                 Group {
                                     switch selectedTab {
                                     case 0:
-                                        ExpensesView(
-                                            totalExpense: $TotalExpense,
-                                            foodExpense: $FoodExpense,
-                                            transportExpense: $TransportExpense,
-                                            communalExpense: $CommunalExpense
+                                        GeneralDebtView(
+                                            Debts: .constant(totalDebts),
+                                            Debtors: .constant(totalDebtors)
                                         )
 
                                     case 1:
-                                        EarningsView(
-                                            totalIncome: $TotalIncome, salaryIncome: $SalaryIncome, businessIncome: $BusinessIncome, investmentIncome: $InvestmentIncome
+                                        DebtView(
+                                            debts: $debts
                                         )
 
                                     case 2:
-                                        AccountsView(
-                                            totalAccount: $TotalAccount, cashAccount: $CashAccount, bankAccount: $BankAccount
+                                        DebtorsView(
+                                            debts: $debtors
                                         )
-
                                     default:
                                         EmptyView()
                                     }
@@ -98,29 +100,31 @@ struct BudgetView: View {
                     }
                 }
 
-                VStack {
-                    Spacer()
-                    HStack {
+                if selectedTab != 0 {
+                    VStack {
                         Spacer()
-                        Button(action: {
-                            switch selectedTab {
-                            case 0: activeSheet = .expense
-                            case 1: activeSheet = .income
-                            case 2: activeSheet = .account
-                            default:
-                                break
+                        HStack {
+                            Spacer()
+                            Button {
+                                switch selectedTab {
+                                case 1:
+                                    activeSheet = .debts
+                                case 2:
+                                    activeSheet = .debtors
+                                default:
+                                    break
+                                }
+                            } label: {
+                                Image(systemName: "plus")
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundColor(.white)
+                                    .frame(width: 60, height: 60)
+                                    .background(Color("MainMobileColor"))
+                                    .clipShape(Circle())
                             }
+                            .padding(.bottom, 110)
+                            .padding(.trailing, 30)
                         }
-                        ) {
-                            Image(systemName: "plus")
-                                .font(.system(size: 32, weight: .bold))
-                                .foregroundColor(.white)
-                                .frame(width: 60, height: 60)
-                                .background(Color("MainMobileColor"))
-                                .clipShape(Circle())
-                        }
-                        .padding(.bottom, 110)
-                        .padding(.trailing, 30)
                     }
                 }
                 
@@ -151,37 +155,23 @@ struct BudgetView: View {
             }
             .sheet(item: $activeSheet) { sheet in
                 switch sheet {
-                case .expense:
-                    AddExpenseView(
-                        foodExpense: $FoodExpense,
-                        transportExpense: $TransportExpense,
-                        communalExpense: $CommunalExpense,
-                        totalExpense: $TotalExpense
+                case .debts:
+                    AddDebtsView(
+                        debts: $debts
                     )
-                case .income:
-                    AddIncomeView(
-                        salaryIncome: $SalaryIncome,
-                        businessIncome: $BusinessIncome,
-                        investmentIncome: $InvestmentIncome,
-                        totalIncome: $TotalIncome
-                    )
-                case .account:
-                    AddAccountsView(
-                        cashAccount: $CashAccount,
-                        bankAccount: $BankAccount,
-                        totalAccount: $TotalAccount
-                    )
+                case .debtors:
+                    AddDebtorsView(
+                        debts: $debtors)
                 }
             }
         }
     }
 }
 
-struct BudgetView_Previews: PreviewProvider {
-    @State static var showSignInView = false
-    @State static var selectedTab = "Бюджет"
+struct DebtPageView_Previews: PreviewProvider {
+    @State static var selectedTab = "Долги"
     
     static var previews: some View {
-        BudgetView(selectedBottomTab: $selectedTab)
+        DebtsPageView(selectedBottomTab: $selectedTab)
     }
 }

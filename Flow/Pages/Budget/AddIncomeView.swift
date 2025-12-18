@@ -32,7 +32,7 @@ struct AddIncomeView: View {
             case .salary: return "Debts"
             case .business: return "Budget"
             case .investment: return "Investment"
-            case .gifts: return "Gift"
+            case .gifts: return "Gifts"
             }
         }
         
